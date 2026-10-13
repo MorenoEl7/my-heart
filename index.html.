@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For You ❤️</title>
+<style>
+  * { margin: 0; padding: 0; }
+  body {
+    background: #000;
+    width: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  canvas {
+    display: block;
+    width: 100vw;
+    height: 100vw;
+    max-height: 100dvh;
+    max-width: 100dvh;
+  }
+</style>
+</head>
+<body>
+<canvas id="heart"></canvas>
+<script>
+const canvas = document.getElementById("heart");
+const ctx = canvas.getContext("2d");
+
+let W, H, scale;
+
+function resize() {
+  const dpr = window.devicePixelRatio || 1;
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  scale = Math.min(W / 600, H / 600);
+  drawBackground();
+}
+
+function drawBackground() {
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, W, H);
+}
+
+function point(x, y) {
+  return {
+    x: W / 2 + x * scale,
+    y: H / 2 - y * scale
+  };
+}
+
+function drawLine(x1, y1, x2, y2, f) {
+  const a = point(x1, y1);
+  const b = point(x2, y2);
+
+  ctx.beginPath();
+  ctx.moveTo(a.x, a.y);
+  ctx.lineTo(b.x, b.y);
+  ctx.strokeStyle = `rgb(${Math.round(255 - 153*f)},${Math.round(178.5*(1-f))},${Math.round(204*(1-f))})`;
+  ctx.lineWidth = Math.max(0.7, 2 * scale);
+  ctx.lineCap = "round";
+  ctx.stroke();
+}
+
+let i = 0;
+
+function animate() {
+  if (i >= 320) return;
+
+  const a = 2 * Math.PI * i / 320;
+  const xo = 256 * Math.sin(a) ** 3;
+  const yo = 16 * (
+    13 * Math.cos(a) -
+    5 * Math.cos(2*a) -
+    2 * Math.cos(3*a) -
+    Math.cos(4*a)
+  );
+
+  const L = 0.15 + Math.random() * 0.35;
+  const xi = xo * (1 - L);
+  const yi = yo * (1 - L);
+
+  for (let j = 0; j < 10; j++) {
+    const f = j / 10;
+    drawLine(
+      xo + (xi-xo)*f,
+      yo + (yi-yo)*f,
+      xo + (xi-xo)*(f+0.1),
+      yo + (yi-yo)*(f+0.1),
+      f
+    );
+  }
+
+  i++;
+  setTimeout(animate, 20);
+}
+
+window.addEventListener("resize", () => {
+  resize();
+  i = 0;
+  animate();
+});
+
+resize();
+animate();
+</script>
+</body>
+</html>
